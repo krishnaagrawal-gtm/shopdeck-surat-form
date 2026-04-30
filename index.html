@@ -364,6 +364,7 @@
       border-radius: 10px;
       font-size: 0.875rem;
       line-height: 1.5;
+      white-space: pre-line;
     }
 
     .status-banner.visible { display: flex; }
@@ -863,12 +864,30 @@
 
       txt.textContent = 'Submitting…';
 
-      // GET to verify GAS is configured — GAS returns CORS headers on GET so we can
-      // read real errors (wrong Sheet/Folder ID etc). POST uses no-cors for reliable delivery.
-      const check = await fetch(APPS_SCRIPT_URL);
-      const checkJson = await check.json();
+      // GET to verify GAS is reachable and configured (CORS works on GET; real errors surface here).
+      // POST uses no-cors for guaranteed delivery — we can't read the POST response either way.
+      let checkJson;
+      try {
+        const check = await fetch(APPS_SCRIPT_URL);
+        checkJson = await check.json();
+      } catch (_) {
+        const isLocal = window.location.protocol === 'file:';
+        if (isLocal) {
+          throw new Error('Open the Railway URL to test — submissions don\'t work from a local file.');
+        }
+        throw new Error(
+          'Cannot reach Apps Script. Check:\n' +
+          '1. Script is deployed (Extensions → Apps Script → Deploy → New deployment)\n' +
+          '2. "Who has access" is set to Anyone\n' +
+          '3. You clicked Allow on the permissions screen\n' +
+          '4. The /exec URL in the code is correct'
+        );
+      }
       if (checkJson.status !== 'ok') {
-        throw new Error(checkJson.message || 'Apps Script configuration error.');
+        throw new Error(
+          'Apps Script config error: ' + (checkJson.message || 'unknown') + '\n' +
+          'Fix: open script.google.com, check SHEET_ID and FOLDER_ID are correct, then redeploy.'
+        );
       }
 
       await fetch(APPS_SCRIPT_URL, {
