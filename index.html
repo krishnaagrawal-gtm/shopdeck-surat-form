@@ -599,18 +599,31 @@
   const SHEET_NAME = 'Applications';
   const FOLDER_ID  = 'PASTE_YOUR_FOLDER_ID_HERE';  // ← from Drive folder URL
 
-  // Open the web app URL in a browser to test the connection
+  // Open the web app URL in a browser to verify both Sheet and Drive are configured.
+  // Good response: {"status":"ok","checks":{"sheet":"ok","drive":"ok"},"rows":0}
+  // Drive error:   {"status":"ok","checks":{"sheet":"ok","drive":"Exception: No item..."},...}
+  // Sheet error:   {"status":"error","checks":{"sheet":"Exception: ..."}}
   function doGet() {
+    const result = { status: 'ok', checks: {} };
     try {
       const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
-      return ContentService.createTextOutput(
-        JSON.stringify({ status: 'ok', sheet: sheet.getName(), rows: sheet.getLastRow() })
-      ).setMimeType(ContentService.MimeType.JSON);
+      result.checks.sheet = 'ok';
+      result.rows = sheet.getLastRow();
     } catch(err) {
-      return ContentService.createTextOutput(
-        JSON.stringify({ status: 'error', message: err.toString() })
-      ).setMimeType(ContentService.MimeType.JSON);
+      result.status = 'error';
+      result.message = 'Sheet error: ' + err.toString();
+      result.checks.sheet = err.toString();
+      return ContentService.createTextOutput(JSON.stringify(result))
+                           .setMimeType(ContentService.MimeType.JSON);
     }
+    try {
+      DriveApp.getFolderById(FOLDER_ID).getName();
+      result.checks.drive = 'ok';
+    } catch(err) {
+      result.checks.drive = err.toString();
+    }
+    return ContentService.createTextOutput(JSON.stringify(result))
+                         .setMimeType(ContentService.MimeType.JSON);
   }
 
   function doPost(e) {
@@ -864,22 +877,23 @@
 
       txt.textContent = 'Submitting…';
 
-      // Try GET to catch config errors (wrong SHEET_ID etc). If the GET itself fails due to
-      // CORS (GAS redirect drops CORS headers for JS fetch), proceed anyway — we know the URL
-      // works because the user can visit it in a browser. POST uses no-cors for delivery.
+      // GET health check — validates both SHEET_ID and FOLDER_ID.
+      // If CORS blocks the fetch, swallow and proceed; if GAS returns an error, surface it.
+      let rowsBefore = null;
       try {
         const check = await fetch(APPS_SCRIPT_URL);
         const checkJson = await check.json();
         if (checkJson.status !== 'ok') {
-          throw new Error(
-            'Apps Script config error: ' + (checkJson.message || 'unknown') + '\n' +
-            'Fix: open script.google.com, check SHEET_ID and FOLDER_ID, then redeploy.'
-          );
+          throw new Error('Sheet error: ' + (checkJson.message || 'unknown') +
+            '\nFix: check SHEET_ID in script.google.com, then redeploy.');
         }
+        if (checkJson.checks && checkJson.checks.drive && checkJson.checks.drive !== 'ok') {
+          throw new Error('Drive folder error: ' + checkJson.checks.drive +
+            '\nFix: check FOLDER_ID in script.google.com — get it from the folder URL, then redeploy.');
+        }
+        rowsBefore = checkJson.rows ?? null;
       } catch (err) {
-        // Re-throw our config errors; swallow CORS/network errors and proceed with the POST.
-        if (err.message && err.message.startsWith('Apps Script config error')) throw err;
-        // CORS fetch failure — URL is known-good (opens fine in browser), just continue.
+        if (err.message.startsWith('Sheet error') || err.message.startsWith('Drive folder error')) throw err;
         console.warn('GET check skipped (CORS):', err.message);
       }
 
@@ -913,6 +927,22 @@
       document.getElementById('fileName').classList.remove('has-file');
       document.getElementById('fileTrigger').className = 'file-trigger';
       document.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+
+      // After 3s, verify row count increased — catches silent GAS failures
+      if (rowsBefore !== null) {
+        setTimeout(async () => {
+          try {
+            const verify = await fetch(APPS_SCRIPT_URL);
+            const vJson  = await verify.json();
+            if (vJson.rows !== undefined && vJson.rows <= rowsBefore) {
+              showStatus('error',
+                'Data was sent but not saved to the Sheet.\n' +
+                'Go to script.google.com → Executions tab to see the error.\n' +
+                'Most likely cause: wrong FOLDER_ID in your GAS script.');
+            }
+          } catch (_) { /* CORS blocked GET — keep optimistic success */ }
+        }, 3000);
+      }
 
     } catch (err) {
       showStatus('error', err.message || 'Could not reach the server. Please check your connection and try again.');
