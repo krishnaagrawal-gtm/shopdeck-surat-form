@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Field Sales Hiring : Surat — ShopDeck</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0D1B3A;
+      --accent:    #4F63D2;
+      --accent-h:  #3D51C0;
+      --text:      #FFFFFF;
+      --sub:       rgba(255,255,255,0.55);
+      --label:     rgba(255,255,255,0.82);
+      --line:      rgba(255,255,255,0.18);
+      --line-focus:#4F63D2;
+      --ph:        rgba(255,255,255,0.28);
+      --error:     #F87171;
+      --success:   #4ADE80;
+      --font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    html { height: 100%; }
+
+    body {
+      min-height: 100%;
+      background: var(--bg);
+      font-family: var(--font);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ──────────────────────────────── */
+    .form-header { padding: 28px 24px 24px; }
+
+    .logo-wrap { margin-bottom: 20px; }
+
+    .logo-wrap img {
+      height: 30px;
+      width: auto;
+      display: block;
+      filter: brightness(4) saturate(0.9);
+      mix-blend-mode: screen;
+    }
+
+    .form-header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .form-header p {
+      font-size: 0.92rem;
+      color: var(--sub);
+      line-height: 1.55;
+    }
+
+    .header-divider {
+      height: 1px;
+      background: var(--line);
+      margin: 0 24px;
+    }
+
+    /* ── Form body ───────────────────────────── */
+    .form-body {
+      padding: 28px 24px 40px;
+      flex: 1;
+    }
+
+    .field-group {
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--label);
+      margin-bottom: 8px;
+      letter-spacing: 0.01em;
+    }
+
+    .req { color: var(--error); margin-left: 1px; }
+
+    /* ── Underline inputs ────────────────────── */
+    input[type="text"],
+    input[type="tel"] {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1.5px solid var(--line);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 1rem;
+      padding: 10px 0;
+      outline: none;
+      border-radius: 0;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: border-color 0.2s;
+    }
+
+    input::placeholder { color: var(--ph); }
+
+    input:focus        { border-bottom-color: var(--line-focus); }
+    input.is-invalid   { border-bottom-color: var(--error); }
+    input.is-valid     { border-bottom-color: var(--success); }
+
+    /* ── Custom dropdown ─────────────────────── */
+    .cs-wrap { position: relative; }
+
+    .cs-trigger {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1.5px solid var(--line);
+      color: var(--ph);
+      font-family: var(--font);
+      font-size: 1rem;
+      padding: 10px 28px 10px 0;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .cs-trigger.has-value  { color: var(--text); }
+    .cs-trigger.is-invalid { border-bottom-color: var(--error); }
+    .cs-trigger.is-valid   { border-bottom-color: var(--success); }
+    .cs-trigger.is-open    { border-bottom-color: var(--line-focus); }
+
+    .cs-chevron {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      stroke: rgba(255,255,255,0.4);
+      transition: transform 0.2s;
+    }
+
+    .cs-trigger.is-open .cs-chevron { transform: rotate(180deg); }
+
+    .cs-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: #152d50;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+      z-index: 200;
+      overflow: hidden;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .cs-menu.is-open { display: block; }
+
+    .cs-option {
+      padding: 13px 16px;
+      font-size: 0.97rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.12s;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cs-option + .cs-option { border-top: 1px solid rgba(255,255,255,0.06); }
+
+    .cs-option:hover    { background: rgba(79,99,210,0.22); }
+    .cs-option.selected { color: var(--accent); }
+
+    .cs-check {
+      width: 14px;
+      height: 14px;
+      stroke: var(--accent);
+      display: none;
+      flex-shrink: 0;
+    }
+
+    .cs-option.selected .cs-check { display: block; }
+
+    /* ── Pill selector ───────────────────────── */
+    .pill-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .pill-btn {
+      flex: 1;
+      min-width: 72px;
+      padding: 10px 14px;
+      background: transparent;
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.52);
+      font-family: var(--font);
+      font-size: 0.92rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.15s, background 0.15s, color 0.15s, box-shadow 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+    }
+
+    .pill-btn:hover {
+      border-color: rgba(255,255,255,0.38);
+      color: var(--text);
+    }
+
+    .pill-btn.selected {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(79,99,210,0.4);
+    }
+
+    .pill-group.is-invalid .pill-btn:not(.selected) {
+      border-color: rgba(248,113,113,0.45);
+    }
+
+    /* ── File upload ─────────────────────────── */
+    .file-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .file-trigger {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1.5px solid var(--line);
+      padding: 10px 0;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .file-trigger:hover     { border-bottom-color: rgba(255,255,255,0.4); }
+    .file-trigger.is-invalid{ border-bottom-color: var(--error); }
+    .file-trigger.is-valid  { border-bottom-color: var(--success); }
+
+    .file-icon-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: rgba(79,99,210,0.18);
+      flex-shrink: 0;
+    }
+
+    .file-icon-btn svg { width: 16px; height: 16px; stroke: var(--accent); }
+
+    .file-text-wrap { flex: 1; min-width: 0; }
+
+    .file-main-text {
+      font-size: 1rem;
+      color: var(--ph);
+      transition: color 0.2s;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-main-text.has-file { color: var(--text); }
+
+    .file-sub-text {
+      font-size: 0.72rem;
+      color: var(--sub);
+      margin-top: 2px;
+    }
+
+    /* ── Inline errors ───────────────────────── */
+    .error-msg {
+      display: none;
+      color: var(--error);
+      font-size: 0.77rem;
+      margin-top: 6px;
+      line-height: 1.3;
+    }
+
+    .error-msg.visible { display: block; }
+
+    /* ── Submit ──────────────────────────────── */
+    .submit-wrap { margin-top: 12px; }
+
+    .btn-submit {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 15px 20px;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.1s, box-shadow 0.18s;
+      box-shadow: 0 4px 20px rgba(79,99,210,0.4);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--accent-h);
+      box-shadow: 0 6px 24px rgba(79,99,210,0.5);
+    }
+
+    .btn-submit:active:not(:disabled) { transform: scale(0.98); }
+
+    .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .spinner {
+      width: 17px;
+      height: 17px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Status banner ───────────────────────── */
+    .status-banner {
+      display: none;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .status-banner.visible { display: flex; }
+
+    .status-banner.success {
+      background: rgba(74,222,128,0.1);
+      border: 1px solid rgba(74,222,128,0.2);
+      color: #86efac;
+    }
+
+    .status-banner.error {
+      background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.2);
+      color: #fca5a5;
+    }
+
+    .status-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Footer ──────────────────────────────── */
+    .form-footer {
+      padding: 16px 24px 24px;
+      font-size: 0.73rem;
+      color: rgba(255,255,255,0.25);
+      text-align: center;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="form-header">
+    <div class="logo-wrap">
+      <img src="logo.png" alt="ShopDeck">
+    </div>
+    <h1>Field Sales Hiring : Surat</h1>
+    <p>Enter your details and our team will get in touch with you.</p>
+  </div>
+
+  <div class="header-divider"></div>
+
+  <!-- Form -->
+  <div class="form-body">
+    <form id="appForm" novalidate>
+
+      <!-- Full Name -->
+      <div class="field-group">
+        <label for="fullName">Full Name <span class="req">*</span></label>
+        <input type="text" id="fullName" name="fullName"
+               placeholder="e.g. Priya Sharma"
+               maxlength="100" autocomplete="name">
+        <span class="error-msg" id="fullName-error"></span>
+      </div>
+
+      <!-- Mobile -->
+      <div class="field-group">
+        <label for="mobile">Mobile Number <span class="req">*</span></label>
+        <input type="tel" id="mobile" name="mobile"
+               placeholder="e.g. 98765 43210"
+               maxlength="15" autocomplete="tel" inputmode="numeric">
+        <span class="error-msg" id="mobile-error"></span>
+      </div>
+
+      <!-- Ecommerce Experience — custom dropdown -->
+      <div class="field-group">
+        <label>Ecommerce Experience <span class="req">*</span></label>
+        <div class="cs-wrap">
+          <button type="button" class="cs-trigger" id="csTrigger"
+                  aria-haspopup="listbox" aria-expanded="false">
+            <span id="csDisplay">Select a platform</span>
+            <svg class="cs-chevron" viewBox="0 0 24 24" fill="none"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <ul class="cs-menu" id="csMenu" role="listbox">
+            <li class="cs-option" role="option" data-value="Amazon">
+              Amazon
+              <svg class="cs-check" viewBox="0 0 24 24" fill="none"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </li>
+            <li class="cs-option" role="option" data-value="Flipkart">
+              Flipkart
+              <svg class="cs-check" viewBox="0 0 24 24" fill="none"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </li>
+            <li class="cs-option" role="option" data-value="Meesho">
+              Meesho
+              <svg class="cs-check" viewBox="0 0 24 24" fill="none"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </li>
+            <li class="cs-option" role="option" data-value="Myntra">
+              Myntra
+              <svg class="cs-check" viewBox="0 0 24 24" fill="none"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </li>
+            <li class="cs-option" role="option" data-value="Ajio">
+              Ajio
+              <svg class="cs-check" viewBox="0 0 24 24" fill="none"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </li>
+            <li class="cs-option" role="option" data-value="Others">
+              Others
+              <svg class="cs-check" viewBox="0 0 24 24" fill="none"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </li>
+            <li class="cs-option" role="option" data-value="No e-commerce experience">
+              No e-commerce experience
+              <svg class="cs-check" viewBox="0 0 24 24" fill="none"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </li>
+          </ul>
+        </div>
+        <!-- hidden value holder used by validation + submission -->
+        <input type="hidden" id="ecomExp" name="ecomExp">
+        <span class="error-msg" id="ecomExp-error"></span>
+      </div>
+
+      <!-- Role -->
+      <div class="field-group">
+        <label>Role <span class="req">*</span></label>
+        <div class="pill-group" id="roleGroup">
+          <button type="button" class="pill-btn" data-value="BDE">BDE</button>
+          <button type="button" class="pill-btn" data-value="KAM">KAM</button>
+          <button type="button" class="pill-btn" data-value="Others">Others</button>
+        </div>
+        <input type="hidden" id="role" name="role">
+        <span class="error-msg" id="role-error"></span>
+      </div>
+
+      <!-- Years of Experience -->
+      <div class="field-group">
+        <label>Years of Experience <span class="req">*</span></label>
+        <div class="pill-group" id="yoeGroup">
+          <button type="button" class="pill-btn" data-value="&lt;1 Year">&lt;1 Year</button>
+          <button type="button" class="pill-btn" data-value="1-4 Years">1-4 Years</button>
+          <button type="button" class="pill-btn" data-value="4+ Years">4+ Years</button>
+        </div>
+        <input type="hidden" id="yearsExp" name="yearsExp">
+        <span class="error-msg" id="yearsExp-error"></span>
+      </div>
+
+      <!-- Resume -->
+      <div class="field-group">
+        <label>Resume <span class="req">*</span></label>
+        <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" class="file-hidden">
+        <label for="resumeFile" class="file-trigger" id="fileTrigger">
+          <span class="file-icon-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </span>
+          <span class="file-text-wrap">
+            <span class="file-main-text" id="fileName">Upload your resume</span>
+            <span class="file-sub-text">PDF or Word &middot; Max 15 MB</span>
+          </span>
+        </label>
+        <span class="error-msg" id="resumeFile-error"></span>
+      </div>
+
+      <!-- Submit -->
+      <div class="submit-wrap">
+        <button type="submit" id="submitBtn" class="btn-submit">
+          <span id="btnText">Submit Application</span>
+          <span class="spinner" id="btnSpinner" style="display:none;"></span>
+        </button>
+
+        <div class="status-banner" id="statusBanner">
+          <span class="status-icon" id="statusIcon"></span>
+          <span id="statusText"></span>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="form-footer">
+    Your information is kept confidential and used only for hiring purposes.
+  </div>
+
+</div>
+
+<script>
+  /*
+  ════════════════════════════════════════════════════════════════
+  SETUP — Read this before going live
+  ════════════════════════════════════════════════════════════════
+
+  STEP 1 — Create your Google Sheet
+    • Make a new Google Sheet.
+    • Add a tab named exactly: Applications
+    • Copy the Sheet ID from its URL:
+      https://docs.google.com/spreadsheets/d/<SHEET_ID>/edit
+
+  STEP 2 — Create a Google Drive folder
+    • Create a folder in Google Drive for uploaded resumes.
+    • Copy the folder ID from its URL:
+      https://drive.google.com/drive/folders/<FOLDER_ID>
+
+  STEP 3 — Deploy the Apps Script
+    • Go to https://script.google.com → New project
+    • Paste the script below (between the ─── lines) into the editor
+    • Replace YOUR_SHEET_ID and YOUR_FOLDER_ID
+    • Click Deploy → New Deployment → Type: Web App
+        Execute as: Me
+        Who has access: Anyone
+    • Click Deploy → copy the Web App URL (ends in /exec)
+
+  STEP 4 — Paste the URL below as APPS_SCRIPT_URL
+
+  ── Apps Script to paste at script.google.com ───────────────────
+
+  const SHEET_ID   = 'PASTE_YOUR_SHEET_ID_HERE';   // ← from Sheet URL
+  const SHEET_NAME = 'Applications';
+  const FOLDER_ID  = 'PASTE_YOUR_FOLDER_ID_HERE';  // ← from Drive folder URL
+
+  // Open the web app URL in a browser to test the connection
+  function doGet() {
+    try {
+      const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+      return ContentService.createTextOutput(
+        JSON.stringify({ status: 'ok', sheet: sheet.getName(), rows: sheet.getLastRow() })
+      ).setMimeType(ContentService.MimeType.JSON);
+    } catch(err) {
+      return ContentService.createTextOutput(
+        JSON.stringify({ status: 'error', message: err.toString() })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  function doPost(e) {
+    try {
+      const data  = JSON.parse(e.postData.contents);
+      const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+
+      if (sheet.getLastRow() === 0) {
+        sheet.appendRow(['Timestamp','Full Name','Mobile','Ecommerce Exp','Role','Years of Experience','Resume Filename','Drive Link','Submitted At']);
+        sheet.setFrozenRows(1);
+        sheet.getRange(1, 1, 1, 9).setFontWeight('bold');
+      }
+
+      // Write the row FIRST so it's safe even if Drive upload times out
+      sheet.appendRow([
+        new Date(), data.fullName||'', data.mobile||'', data.ecomExp||'',
+        data.role||'', data.yearsExp||'', data.resumeName||'', '', data.submittedAt||''
+      ]);
+
+      // Upload resume to Drive, then back-fill the link in the row above
+      let driveLink = '';
+      if (data.resumeBase64) {
+        const ext      = (data.resumeName || 'resume').split('.').pop();
+        const safeName = (data.fullName || 'Applicant').replace(/[^\w\s]/g,'').trim().replace(/\s+/g,' ');
+        const mob      = (data.mobile || '').replace(/\D/g,'');
+        const fileName = safeName + '_' + mob + '.' + ext;
+        const bytes    = Utilities.base64Decode(data.resumeBase64);
+        const blob     = Utilities.newBlob(bytes, data.resumeMimeType, fileName);
+        const file     = DriveApp.getFolderById(FOLDER_ID).createFile(blob);
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        driveLink = file.getUrl();
+        sheet.getRange(sheet.getLastRow(), 8).setValue(driveLink);
+      }
+
+      return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
+                           .setMimeType(ContentService.MimeType.JSON);
+    } catch(err) {
+      console.error(err); // visible in Apps Script → Executions tab
+      return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
+                           .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  ────────────────────────────────────────────────────────────────
+  */
+
+  // ← Paste your deployed Web App URL here
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwgI2anRSpb-xfUPyKeR7Ccjs0Y0ys287W5gFGXtytiQIVY9GJhs6RHDdLSceCBBgAE/exec';
+
+  // ── Custom dropdown ───────────────────────────────────────────
+  const csTrigger = document.getElementById('csTrigger');
+  const csMenu    = document.getElementById('csMenu');
+  const csDisplay = document.getElementById('csDisplay');
+  const ecomInput = document.getElementById('ecomExp');
+
+  csTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const opening = !csMenu.classList.contains('is-open');
+    csMenu.classList.toggle('is-open', opening);
+    csTrigger.classList.toggle('is-open', opening);
+    csTrigger.setAttribute('aria-expanded', opening);
+  });
+
+  csMenu.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const opt = e.target.closest('.cs-option');
+    if (!opt) return;
+
+    const val = opt.dataset.value;
+    ecomInput.value   = val;
+    csDisplay.textContent = val;
+    csTrigger.classList.add('has-value');
+    csMenu.classList.remove('is-open');
+    csTrigger.classList.remove('is-open');
+    csTrigger.setAttribute('aria-expanded', 'false');
+
+    csMenu.querySelectorAll('.cs-option').forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+
+    vEcom(true);
+  });
+
+  document.addEventListener('click', () => {
+    csMenu.classList.remove('is-open');
+    csTrigger.classList.remove('is-open');
+    csTrigger.setAttribute('aria-expanded', 'false');
+  });
+
+  // ── Pill groups ───────────────────────────────────────────────
+  function initPillGroup(groupId, inputId, validateFn) {
+    document.getElementById(groupId).addEventListener('click', (e) => {
+      const btn = e.target.closest('.pill-btn');
+      if (!btn) return;
+      document.querySelectorAll('#' + groupId + ' .pill-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById(inputId).value = btn.dataset.value;
+      validateFn(true);
+    });
+  }
+
+  initPillGroup('roleGroup', 'role', () => vRole(true));
+  initPillGroup('yoeGroup',  'yearsExp', () => vYoe(true));
+
+  // ── Validation ────────────────────────────────────────────────
+  const MOBILE_RE    = /^(\+91|91|0)?[6-9]\d{9}$/;
+  const ALLOWED_EXT  = /\.(pdf|doc|docx)$/i;
+  const ALLOWED_MIME = ['application/pdf','application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  const MAX_SIZE = 15 * 1024 * 1024;
+
+  function markInvalid(id, msg) {
+    const el  = document.getElementById(id);
+    const err = document.getElementById(id + '-error');
+    if (el)  { el.classList.remove('is-valid'); el.classList.add('is-invalid'); }
+    if (err) { err.textContent = msg; err.classList.add('visible'); }
+    if (id === 'ecomExp') {
+      csTrigger.classList.remove('is-valid'); csTrigger.classList.add('is-invalid');
+    }
+    if (id === 'role')     document.getElementById('roleGroup').classList.add('is-invalid');
+    if (id === 'yearsExp') document.getElementById('yoeGroup').classList.add('is-invalid');
+    if (id === 'resumeFile') {
+      const t = document.getElementById('fileTrigger');
+      t.classList.remove('is-valid'); t.classList.add('is-invalid');
+    }
+  }
+
+  function markValid(id) {
+    const el  = document.getElementById(id);
+    const err = document.getElementById(id + '-error');
+    if (el)  { el.classList.remove('is-invalid'); el.classList.add('is-valid'); }
+    if (err) { err.classList.remove('visible'); }
+    if (id === 'ecomExp') {
+      csTrigger.classList.remove('is-invalid'); csTrigger.classList.add('is-valid');
+    }
+    if (id === 'role')     document.getElementById('roleGroup').classList.remove('is-invalid');
+    if (id === 'yearsExp') document.getElementById('yoeGroup').classList.remove('is-invalid');
+    if (id === 'resumeFile') {
+      const t = document.getElementById('fileTrigger');
+      t.classList.remove('is-invalid'); t.classList.add('is-valid');
+    }
+  }
+
+  function vName(show) {
+    const v = document.getElementById('fullName').value.trim();
+    if (!v)           { show && markInvalid('fullName','Full name is required.'); return false; }
+    if (v.length < 2) { show && markInvalid('fullName','Please enter your full name.'); return false; }
+    markValid('fullName'); return true;
+  }
+
+  function vMobile(show) {
+    const v = document.getElementById('mobile').value.trim().replace(/\s+/g,'');
+    if (!v)                 { show && markInvalid('mobile','Mobile number is required.'); return false; }
+    if (!MOBILE_RE.test(v)) { show && markInvalid('mobile','Enter a valid 10-digit Indian mobile number.'); return false; }
+    markValid('mobile'); return true;
+  }
+
+  function vEcom(show) {
+    const v = ecomInput.value;
+    if (!v) { show && markInvalid('ecomExp','Please select your ecommerce experience.'); return false; }
+    markValid('ecomExp'); return true;
+  }
+
+  function vRole(show) {
+    const v = document.getElementById('role').value;
+    if (!v) { show && markInvalid('role','Please select a role.'); return false; }
+    markValid('role'); return true;
+  }
+
+  function vYoe(show) {
+    const v = document.getElementById('yearsExp').value;
+    if (!v) { show && markInvalid('yearsExp','Please select your years of experience.'); return false; }
+    markValid('yearsExp'); return true;
+  }
+
+  function vResume(show) {
+    const inp = document.getElementById('resumeFile');
+    if (!inp.files || !inp.files.length) { show && markInvalid('resumeFile','Please upload your resume.'); return false; }
+    const f = inp.files[0];
+    if (!ALLOWED_MIME.includes(f.type) && !ALLOWED_EXT.test(f.name)) {
+      show && markInvalid('resumeFile','Please upload a PDF or Word document (.pdf, .doc, .docx).'); return false;
+    }
+    if (f.size > MAX_SIZE) { show && markInvalid('resumeFile','File size must be under 15 MB.'); return false; }
+    markValid('resumeFile'); return true;
+  }
+
+  function liveWire(id, fn) {
+    const el = document.getElementById(id);
+    let dirty = false;
+    el.addEventListener('blur',  () => { dirty = true; fn(true); });
+    el.addEventListener('input', () => { if (dirty) fn(true); });
+  }
+
+  liveWire('fullName', vName);
+  liveWire('mobile',   vMobile);
+
+  document.getElementById('resumeFile').addEventListener('change', function () {
+    const nameEl = document.getElementById('fileName');
+    if (this.files && this.files[0]) {
+      nameEl.textContent = this.files[0].name;
+      nameEl.classList.add('has-file');
+    } else {
+      nameEl.textContent = 'Upload your resume';
+      nameEl.classList.remove('has-file');
+    }
+    vResume(true);
+  });
+
+  // ── Status banner ─────────────────────────────────────────────
+  function showStatus(type, msg) {
+    const b = document.getElementById('statusBanner');
+    b.className = 'status-banner visible ' + type;
+    document.getElementById('statusIcon').textContent = type === 'success' ? '✓' : '✕';
+    document.getElementById('statusText').textContent = msg;
+    b.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // ── Submit ────────────────────────────────────────────────────
+  document.getElementById('appForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    document.getElementById('statusBanner').className = 'status-banner';
+
+    const ok = [vName(true), vMobile(true), vEcom(true), vRole(true), vYoe(true), vResume(true)].every(Boolean);
+    if (!ok) {
+      const first = document.querySelector('.is-invalid');
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    // Guard against unconfigured URL
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('YOUR_APPS_SCRIPT')) {
+      showStatus('error', 'The form is not connected yet. Please configure the Apps Script URL first.');
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    const txt = document.getElementById('btnText');
+    const spn = document.getElementById('btnSpinner');
+    btn.disabled = true;
+    txt.textContent = 'Uploading…';
+    spn.style.display = 'block';
+
+    try {
+      const file = document.getElementById('resumeFile').files[0];
+
+      const resumeBase64 = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload  = () => res(r.result.split(',')[1]);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+
+      txt.textContent = 'Submitting…';
+
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          fullName:       document.getElementById('fullName').value.trim(),
+          mobile:         document.getElementById('mobile').value.trim(),
+          ecomExp:        ecomInput.value,
+          role:           document.getElementById('role').value,
+          yearsExp:       document.getElementById('yearsExp').value,
+          resumeName:     file.name,
+          resumeMimeType: file.type || 'application/octet-stream',
+          resumeBase64,
+          submittedAt:    new Date().toISOString()
+        })
+      });
+      const result = await response.json();
+      if (result.status !== 'success') {
+        throw new Error(result.message || 'Apps Script returned an error.');
+      }
+
+      showStatus('success', 'Application submitted! Our team will get in touch with you soon.');
+      this.reset();
+      ecomInput.value = '';
+      csDisplay.textContent = 'Select a platform';
+      csTrigger.className = 'cs-trigger';
+      csMenu.querySelectorAll('.cs-option').forEach(o => o.classList.remove('selected'));
+      document.getElementById('role').value = '';
+      document.getElementById('yearsExp').value = '';
+      document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('selected'));
+      document.getElementById('fileName').textContent = 'Upload your resume';
+      document.getElementById('fileName').classList.remove('has-file');
+      document.getElementById('fileTrigger').className = 'file-trigger';
+      document.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+
+    } catch (err) {
+      const msg = err.message && !err.message.includes('fetch')
+        ? 'Submission failed: ' + err.message
+        : 'Could not reach the server. Please check your connection and try again.';
+      showStatus('error', msg);
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+      txt.textContent = 'Submit Application';
+      spn.style.display = 'none';
+    }
+  });
+</script>
+
+</body>
+</html>
