@@ -863,8 +863,17 @@
 
       txt.textContent = 'Submitting…';
 
-      const response = await fetch(APPS_SCRIPT_URL, {
+      // GET to verify GAS is configured — GAS returns CORS headers on GET so we can
+      // read real errors (wrong Sheet/Folder ID etc). POST uses no-cors for reliable delivery.
+      const check = await fetch(APPS_SCRIPT_URL);
+      const checkJson = await check.json();
+      if (checkJson.status !== 'ok') {
+        throw new Error(checkJson.message || 'Apps Script configuration error.');
+      }
+
+      await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
+        mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({
           fullName:       document.getElementById('fullName').value.trim(),
@@ -878,10 +887,6 @@
           submittedAt:    new Date().toISOString()
         })
       });
-      const result = await response.json();
-      if (result.status !== 'success') {
-        throw new Error(result.message || 'Apps Script returned an error.');
-      }
 
       showStatus('success', 'Application submitted! Our team will get in touch with you soon.');
       this.reset();
@@ -898,10 +903,7 @@
       document.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
 
     } catch (err) {
-      const msg = err.message && !err.message.includes('fetch')
-        ? 'Submission failed: ' + err.message
-        : 'Could not reach the server. Please check your connection and try again.';
-      showStatus('error', msg);
+      showStatus('error', err.message || 'Could not reach the server. Please check your connection and try again.');
       console.error(err);
     } finally {
       btn.disabled = false;
