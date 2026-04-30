@@ -565,6 +565,12 @@
 
 </div>
 
+<!-- Hidden sink for GAS form POST — native form submit works cross-origin where fetch no-cors doesn't -->
+<iframe name="gas-sink" style="display:none" aria-hidden="true"></iframe>
+<form id="gasForm" method="POST" target="gas-sink" style="display:none">
+  <input type="hidden" id="gasPayload" name="payload">
+</form>
+
 <script>
   /*
   ════════════════════════════════════════════════════════════════
@@ -628,7 +634,7 @@
 
   function doPost(e) {
     try {
-      const data  = JSON.parse(e.postData.contents);
+      const data  = JSON.parse(e.parameter.payload);
       const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
 
       if (sheet.getLastRow() === 0) {
@@ -897,22 +903,21 @@
         console.warn('GET check skipped (CORS):', err.message);
       }
 
-      await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({
-          fullName:       document.getElementById('fullName').value.trim(),
-          mobile:         document.getElementById('mobile').value.trim(),
-          ecomExp:        ecomInput.value,
-          role:           document.getElementById('role').value,
-          yearsExp:       document.getElementById('yearsExp').value,
-          resumeName:     file.name,
-          resumeMimeType: file.type || 'application/octet-stream',
-          resumeBase64,
-          submittedAt:    new Date().toISOString()
-        })
+      // Native form POST to GAS — cross-origin, no CORS issues, GAS reads e.parameter.payload
+      const gasForm = document.getElementById('gasForm');
+      gasForm.action = APPS_SCRIPT_URL;
+      document.getElementById('gasPayload').value = JSON.stringify({
+        fullName:       document.getElementById('fullName').value.trim(),
+        mobile:         document.getElementById('mobile').value.trim(),
+        ecomExp:        ecomInput.value,
+        role:           document.getElementById('role').value,
+        yearsExp:       document.getElementById('yearsExp').value,
+        resumeName:     file.name,
+        resumeMimeType: file.type || 'application/octet-stream',
+        resumeBase64,
+        submittedAt:    new Date().toISOString()
       });
+      gasForm.submit();
 
       showStatus('success', 'Application submitted! Our team will get in touch with you soon.');
       this.reset();
