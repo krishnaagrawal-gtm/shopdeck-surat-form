@@ -864,30 +864,23 @@
 
       txt.textContent = 'Submitting…';
 
-      // GET to verify GAS is reachable and configured (CORS works on GET; real errors surface here).
-      // POST uses no-cors for guaranteed delivery — we can't read the POST response either way.
-      let checkJson;
+      // Try GET to catch config errors (wrong SHEET_ID etc). If the GET itself fails due to
+      // CORS (GAS redirect drops CORS headers for JS fetch), proceed anyway — we know the URL
+      // works because the user can visit it in a browser. POST uses no-cors for delivery.
       try {
         const check = await fetch(APPS_SCRIPT_URL);
-        checkJson = await check.json();
-      } catch (_) {
-        const isLocal = window.location.protocol === 'file:';
-        if (isLocal) {
-          throw new Error('Open the Railway URL to test — submissions don\'t work from a local file.');
+        const checkJson = await check.json();
+        if (checkJson.status !== 'ok') {
+          throw new Error(
+            'Apps Script config error: ' + (checkJson.message || 'unknown') + '\n' +
+            'Fix: open script.google.com, check SHEET_ID and FOLDER_ID, then redeploy.'
+          );
         }
-        throw new Error(
-          'Cannot reach Apps Script. Check:\n' +
-          '1. Script is deployed (Extensions → Apps Script → Deploy → New deployment)\n' +
-          '2. "Who has access" is set to Anyone\n' +
-          '3. You clicked Allow on the permissions screen\n' +
-          '4. The /exec URL in the code is correct'
-        );
-      }
-      if (checkJson.status !== 'ok') {
-        throw new Error(
-          'Apps Script config error: ' + (checkJson.message || 'unknown') + '\n' +
-          'Fix: open script.google.com, check SHEET_ID and FOLDER_ID are correct, then redeploy.'
-        );
+      } catch (err) {
+        // Re-throw our config errors; swallow CORS/network errors and proceed with the POST.
+        if (err.message && err.message.startsWith('Apps Script config error')) throw err;
+        // CORS fetch failure — URL is known-good (opens fine in browser), just continue.
+        console.warn('GET check skipped (CORS):', err.message);
       }
 
       await fetch(APPS_SCRIPT_URL, {
